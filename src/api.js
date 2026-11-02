@@ -1,5 +1,24 @@
-// Supabase REST(PostgREST) 호출. 키는 개발 서버 프록시(vite.config.js)가 붙인다
-const BASE = '/rest/v1'
+// Supabase REST(PostgREST) 호출. 키는 로컬에서는 개발 서버 프록시(vite.config.js),
+// 배포에서는 서버 함수(api/rest/v1/[table].js)가 붙인다
+const BASE = '/api/rest/v1'
+const PASSWORD_KEY = 'qa-dummy-admin-password'
+
+// 배포 환경의 관리 비밀번호. 탭을 닫으면 사라지도록 sessionStorage 에만 둔다 (로컬 개발에서는 쓰이지 않음)
+function getPassword() {
+  try {
+    return sessionStorage.getItem(PASSWORD_KEY) || ''
+  } catch {
+    return ''
+  }
+}
+
+function setPassword(value) {
+  try {
+    sessionStorage.setItem(PASSWORD_KEY, value)
+  } catch {
+    // 저장이 막힌 환경이면 매번 다시 묻게 됨
+  }
+}
 
 // PostgreSQL 오류 코드 → 화면에 보여줄 문장
 const PG_MESSAGES = {
@@ -10,15 +29,28 @@ const PG_MESSAGES = {
   PGRST106: 'qa_dummy 스키마가 API에 노출되어 있지 않습니다. 대시보드 Exposed schemas 에 추가하세요.',
 }
 
-async function request(path, options = {}) {
+async function request(path, options = {}, retried = false) {
   let res
   try {
     res = await fetch(`${BASE}${path}`, {
       ...options,
-      headers: { 'Content-Type': 'application/json', Prefer: 'return=representation', ...options.headers },
+      headers: {
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+        'x-admin-password': encodeURIComponent(getPassword()),
+        ...options.headers,
+      },
     })
   } catch {
-    throw new Error('개발 서버에 연결할 수 없습니다. npm run dev 가 실행 중인지 확인하세요.')
+    throw new Error('서버에 연결할 수 없습니다. 로컬이면 npm run dev 가 실행 중인지 확인하세요.')
+  }
+  // 배포 환경에서 비밀번호가 없거나 틀리면 한 번 묻고 다시 시도
+  if (res.status === 401 && !retried) {
+    const input = window.prompt('관리 비밀번호를 입력하세요')
+    if (input) {
+      setPassword(input)
+      return request(path, options, true)
+    }
   }
   const text = await res.text()
   let data = null

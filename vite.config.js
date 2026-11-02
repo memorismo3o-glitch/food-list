@@ -5,9 +5,13 @@ import react from '@vitejs/plugin-react'
 // 어느 폴더에서 실행해도 이 폴더의 .env.local 을 읽도록 기준 경로를 고정
 const ROOT = fileURLToPath(new URL('.', import.meta.url))
 
-// 브라우저는 /rest 로만 요청하고, 개발 서버가 service_role 키를 붙여 Supabase로 전달한다
-// 키는 .env.local 에만 있고 VITE_ 접두어가 없어서 브라우저 코드에 들어가지 않는다
-export default defineConfig(({ mode }) => {
+// 브라우저는 /api/rest 로만 요청하고, 로컬에서는 개발 서버가 service_role 키를 붙여 Supabase로 전달한다
+// 배포(Vercel)에서는 api/rest/v1/[table].js 서버 함수가 같은 역할을 한다
+// 키는 .env.local · Vercel 환경 변수에만 있고 VITE_ 접두어가 없어서 브라우저 코드에 들어가지 않는다
+export default defineConfig(({ command, mode }) => {
+  // 빌드에는 키가 필요 없다 (Vercel 빌드 환경에는 .env.local 이 없음)
+  if (command === 'build') return { plugins: [react()] }
+
   const env = loadEnv(mode, ROOT, '') // .env, .env.local 순으로 읽음 (.env.local 우선)
   const url = (env.SUPABASE_URL || '').replace(/\/+$/, '')
   const anonKey = env.SUPABASE_ANON_KEY
@@ -39,7 +43,12 @@ export default defineConfig(({ mode }) => {
       host: '127.0.0.1', // 내 PC에서만 접속 가능
       port: 5173,
       proxy: {
-        '/rest': { target: url, changeOrigin: true, headers },
+        '/api/rest': {
+          target: url,
+          changeOrigin: true,
+          headers,
+          rewrite: (p) => p.replace(/^\/api\/rest/, '/rest'),
+        },
       },
     },
   }
