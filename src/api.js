@@ -25,8 +25,8 @@ const PG_MESSAGES = {
   '23503': '질문 또는 이슈에서 이 상품을 참조하고 있어 삭제할 수 없습니다. 해당 질문 · 이슈의 상품코드를 먼저 비우세요.',
   '23505': '이미 있는 상품코드입니다.',
   '23514': '입력 형식이 맞지 않습니다. (상품코드는 P-0000 형식, 가격은 1 이상)',
-  '42501': '권한이 없습니다. 04_local_admin_grants.sql 을 실행했는지 확인하세요.',
-  PGRST106: 'qa_dummy 스키마가 API에 노출되어 있지 않습니다. 대시보드 Exposed schemas 에 추가하세요.',
+  '42501': '권한이 없습니다. anon 키가 아니라 service_role 키를 넣었는지 확인하세요.',
+  PGRST205: '상품 테이블이 없습니다. Supabase SQL Editor에서 01_schema.sql, 02_seed.sql 을 실행하세요.',
 }
 
 async function request(path, options = {}, retried = false) {

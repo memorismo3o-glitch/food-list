@@ -33,10 +33,9 @@ export default async function handler(req, res) {
   const search = new URL(req.url, 'http://localhost').searchParams
   search.delete('table') // 동적 경로 값이 쿼리에 섞여 들어오는 경우 제거
 
+  // 테이블은 public 스키마(기본값)에 있어 스키마 지정 헤더는 필요 없다
   const headers = {
     apikey: key,
-    'Accept-Profile': 'qa_dummy',
-    'Content-Profile': 'qa_dummy',
     'Content-Type': 'application/json',
     Prefer: 'return=representation',
   }

@@ -73,7 +73,7 @@ export default function App() {
       <header className="header">
         <div>
           <h1>상품 관리</h1>
-          <p className="sub">실습용 가상 데이터 · Supabase qa_dummy 스키마</p>
+          <p className="sub">실습용 가상 데이터 · Supabase</p>
         </div>
         <button className="primary" onClick={() => setShowForm((v) => !v)}>
           {showForm ? '추가 닫기' : '+ 상품 추가'}

@@ -26,14 +26,10 @@ export default defineConfig(({ command, mode }) => {
   if (!serviceKey) {
     throw new Error('.env.local 에 SUPABASE_SERVICE_ROLE_KEY 를 넣어 주세요. (조회 · 추가 · 삭제에 사용)')
   }
-  // anon 키는 qa_dummy 권한이 없어 지금은 요청에 쓰지 않는다. 나중에 읽기 전용 화면을 만들 때 사용
+  // anon 키는 RLS 정책이 없어 데이터를 읽을 수 없으므로 지금은 요청에 쓰지 않는다. 나중에 읽기 전용 화면을 만들 때 사용
   console.log(`[qa-dummy-admin] 프로젝트 URL ${url} · service_role 키 설정됨 · anon 키 ${anonKey ? '설정됨(미사용)' : '없음'}`)
 
-  const headers = {
-    apikey: serviceKey,
-    'Accept-Profile': 'qa_dummy',
-    'Content-Profile': 'qa_dummy',
-  }
+  const headers = { apikey: serviceKey } // 테이블은 public 스키마(기본값)에 있음
   // 예전 JWT 형식 키(eyJ...)는 Authorization 헤더도 필요. 새 형식(sb_secret_...)은 apikey 만 사용
   if (!serviceKey.startsWith('sb_')) headers.Authorization = `Bearer ${serviceKey}`
 

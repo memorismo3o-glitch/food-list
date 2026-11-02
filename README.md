@@ -1,6 +1,6 @@
 # qa-dummy-admin — 실습용 상품 관리 페이지
 
-Supabase `qa_dummy` 스키마의 상품을 조회 · 검색 · 추가 · 삭제한다. 데이터는 전부 가상(실습 전용).
+Supabase(public 스키마)의 상품을 조회 · 검색 · 추가 · 삭제한다. 데이터는 전부 가상(실습 전용).
 
 ## 구조
 
@@ -11,16 +11,14 @@ Vercel: 브라우저 ──/api/rest/v1/...──▶ 서버 함수 api/rest/v1/[
 
 - 키는 `.env.local`(로컬) · Vercel 환경 변수(배포)에만 있고 브라우저 코드에는 들어가지 않는다
 - 배포 서버 함수는 `ADMIN_PASSWORD` 를 맞힌 요청만, `products` 테이블의 조회 · 추가 · 삭제만 통과시킨다
-- anon 키에는 권한을 주지 않으므로 이 경로 밖에서는 qa_dummy 에 접근할 수 없다
+- 테이블은 RLS를 켜 두고 정책을 만들지 않았으므로 anon 키로는 읽거나 쓸 수 없다 (RLS를 끄지 말 것)
 
 ## 처음 한 번
 
 1. Node.js LTS 설치 — https://nodejs.org
 2. Supabase SQL Editor에서 `docs/dummy/supabase/01_schema.sql`, `02_seed.sql` 실행 (아직 안 했다면)
-3. 대시보드 Project Settings → API (Data API) → **Exposed schemas** 에 `qa_dummy` 추가
-4. SQL Editor에서 `docs/dummy/supabase/04_local_admin_grants.sql` 실행
-5. 이 폴더의 `.env.local` 에 프로젝트 URL · anon 키 · service_role 키를 채운다 (Session pooler 주소는 쓰지 않음)
-6. 이 폴더에서 패키지 설치
+3. 이 폴더의 `.env.local` 에 프로젝트 URL · anon 키 · service_role 키를 채운다 (Session pooler 주소는 쓰지 않음)
+4. 이 폴더에서 패키지 설치
 
 ```bash
 npm install
@@ -60,8 +58,8 @@ npm run dev
 
 | 화면 메시지 | 조치 |
 | --- | --- |
-| qa_dummy 스키마가 API에 노출되어 있지 않습니다 | 처음 한 번 3번 |
-| 권한이 없습니다 | 처음 한 번 4번 |
+| 상품 테이블이 없습니다 | 처음 한 번 2번 |
+| 권한이 없습니다 | `.env.local` · Vercel 환경 변수의 키가 service_role 키인지 확인 |
 | 서버에 연결할 수 없습니다 | 로컬이면 `npm run dev` 실행 중인지 확인 |
 | Vercel 환경 변수 … 를 설정한 뒤 다시 배포하세요 | Vercel 배포 2번 |
 | 관리 비밀번호가 맞지 않습니다 | 새로고침 후 비밀번호 다시 입력 |
